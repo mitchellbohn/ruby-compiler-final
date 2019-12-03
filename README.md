@@ -1,4 +1,4 @@
-# ruby-compiler-final
+# ruby-interpreter-final
 This is our final project for compiler structures with Kastleton.
 
 # Written Evaluation 1:
