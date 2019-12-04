@@ -2,6 +2,8 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <sstream>
+#include <iterator>
 
 using namespace std;
 
@@ -59,5 +61,21 @@ vector<string> scanner(string rubyFile) {
 vector<vector<string>> tokenizer(vector<string> rubyLines) {
 	cout << "[4] Tokenizing lines..." << endl;
 	vector<vector<string>> tokenized;
+	for(unsigned int i = 0; i<rubyLines.size(); i++) {
+		stringstream ss(rubyLines[i]);
+		istream_iterator<string> begin(ss);
+		istream_iterator<string> end;
+		vector<string> tokens(begin, end);
+		//copy(tokens.begin(), tokens.end(), ostream_iterator<string>(cout, "\n"));
+		tokenized.push_back(tokens);
+	}
+	cout << "Here is your 2D token Vector: " << endl;
+	for (unsigned int i = 0; i < tokenized.size(); i++) {
+		cout << "Row " << i << ": ";
+		for (unsigned int j = 0; j < tokenized[i].size(); j++) {
+			cout << tokenized[i][j] << ' ';
+		}
+		cout << endl;
+	}
 	return tokenized;
 }
