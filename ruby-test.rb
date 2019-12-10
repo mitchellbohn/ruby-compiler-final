@@ -1,9 +1,16 @@
-puts 'Hello World!'
+puts 'Hello 
+World!'
+puts 'looping...'
 intValue = 5
 puts intValue
-
+puts "double quotations and more than 2 words..."
+strValue = "hello from function"
+puts strValue
+charValue = 'a'
 def fcn
-  puts "henlo"
+  puts "in the function"
+  stringInFcn = "another line"
+  puts stringInFcn
 end
-
 fcn
+puts "dont you, forget about me..."

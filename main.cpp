@@ -4,12 +4,38 @@
 #include <vector>
 #include <sstream>
 #include <iterator>
+//#include ""
 
 using namespace std;
+
+/* 0 string
+ * 1 bool
+ * 2 int
+ */
+class Value {
+	public:
+	string name;
+	int valType;
+	string value;
+};
+
+class Function {
+	public:
+	string name;
+	int start;
+	int end;
+	
+};
 
 vector<string> scanner(string rubyFile);
 
 vector<vector<string>> tokenizer(vector<string> rubyLines);
+
+void traverse(vector<vector<string>> tokens, int start, int end);
+
+int puts(vector<vector<string>> tokens, int row);
+
+int def(vector<vector<string>> tokens, int row);
 
 int main(int argc, char *argv[]) {
 	//handling parameters and first possible errors
@@ -24,7 +50,8 @@ int main(int argc, char *argv[]) {
 			cout << "HELP: execute program with the name of the .rb file you wish to interpret to c++." << endl;
 		else {
 			vector<string> rubyLines = scanner(parameter);
-			vector<vector<string>> tokenizedLines = tokenizer(rubyLines);
+			vector<vector<string>> tokens = tokenizer(rubyLines);
+			traverse(tokens, 0, tokens.size()-1);
 		}
 	}
 	return 0;
@@ -66,16 +93,91 @@ vector<vector<string>> tokenizer(vector<string> rubyLines) {
 		istream_iterator<string> begin(ss);
 		istream_iterator<string> end;
 		vector<string> tokens(begin, end);
-		//copy(tokens.begin(), tokens.end(), ostream_iterator<string>(cout, "\n"));
 		tokenized.push_back(tokens);
 	}
 	cout << "Here is your 2D token Vector: " << endl;
 	for (unsigned int i = 0; i < tokenized.size(); i++) {
 		cout << "Row " << i << ": ";
-		for (unsigned int j = 0; j < tokenized[i].size(); j++) {
+		for (unsigned int j = 0; j < tokenized[i].size(); j++)
 			cout << tokenized[i][j] << ' ';
-		}
 		cout << endl;
 	}
 	return tokenized;
+}
+
+void traverse(vector<vector<string>> tokens, int start, int end) {
+	cout << "traversing..." << endl;
+	vector<Value> values;
+	string currentCase;
+	for(int i = start; i < end; i++) {
+		for (unsigned int j = 0; j < tokens[i].size(); j++) {
+			if (j == 0 && tokens[i][j] == "puts") {
+				i = puts(tokens, i);
+				j = tokens[i].size()-1;
+			}
+			else if (tokens[i][j] == "def") {
+				i = def(tokens, i);
+			}
+			else if (tokens[i][j] == "puts") {
+			}
+			else if (tokens[i][j] == "puts") {
+			}
+			else {
+				if(tokens[i][j+1] == "=") {
+					cout << "CAUGHT HERE" << endl;
+					//TODO: regex to determine val type.
+					/*cout << "HERE!" << endl;
+					Value *p = new Value;
+					p->name = tokens[i][j];
+					p->valType = 0;
+					p->value = tokens[i][j+2];
+					values.push_back(*p);
+					cout << "NAME HERE: " << values[0].name << endl;*/
+				}
+			}
+			
+		}
+	}
+	return;
+}
+
+int puts(vector<vector<string>> tokens, int row) {
+	int col = 1;
+	bool done = false;
+		if (tokens[row][col].front() == '\'') {
+			tokens[row][col].erase(0,1);
+			while (tokens[row][col].back() != '\'') {
+				cout << tokens[row][col] << ' ';
+				col++;
+			}
+			tokens[row][col].erase(tokens[row][col].size()-1,1);
+			cout << tokens[row][col] << endl;
+		}else if (tokens[row][col].front() == '\"') {
+			tokens[row][col].erase(0,1);
+			while (tokens[row][col].back() != '\"') {
+				cout << tokens[row][col] << ' ';
+				col++;
+			}
+			tokens[row][col].erase(tokens[row][col].size()-1,1);
+			cout << tokens[row][col] << endl;
+		}else {
+			cout << "Is " << tokens[row][col] << " a variable? to be continued..." << endl;
+		}
+		cout << endl;
+	return row;
+}
+
+bool isVar(string name) {
+	return true;
+}
+
+int def(vector<vector<string>> tokens, int row) {
+	Function *p = new Function;
+	p->name = tokens[row][1];
+	while(tokens[row][0] != "end") {
+		row++;
+	}
+	p->end = row;
+	cout << "name: " << p->name << endl;
+	return row;
 }
