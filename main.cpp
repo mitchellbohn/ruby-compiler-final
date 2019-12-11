@@ -4,7 +4,7 @@
 #include <vector>
 #include <sstream>
 #include <iterator>
-//#include ""
+#include <regex>
 
 using namespace std;
 
@@ -114,17 +114,13 @@ void traverse(vector<vector<string>> tokens, int start, int end) {
 			if (j == 0 && tokens[i][j] == "puts") {
 				i = puts(tokens, i);
 				j = tokens[i].size()-1;
-			}
-			else if (tokens[i][j] == "def") {
+			} else if (tokens[i][j] == "def") {
 				i = def(tokens, i);
-			}
-			else if (tokens[i][j] == "puts") {
-			}
-			else if (tokens[i][j] == "puts") {
-			}
-			else {
+			} else if (tokens[i][j] == "puts") {
+			} else if (tokens[i][j] == "puts") {
+			} else {
 				if(tokens[i][j+1] == "=") {
-					cout << "CAUGHT HERE" << endl;
+					cout << "CAUGHT ELSE ROW: " << i << endl;
 					//TODO: regex to determine val type.
 					/*cout << "HERE!" << endl;
 					Value *p = new Value;
@@ -142,29 +138,62 @@ void traverse(vector<vector<string>> tokens, int start, int end) {
 }
 
 int puts(vector<vector<string>> tokens, int row) {
-	int col = 1;
-	bool done = false;
-		if (tokens[row][col].front() == '\'') {
-			tokens[row][col].erase(0,1);
-			while (tokens[row][col].back() != '\'') {
-				cout << tokens[row][col] << ' ';
-				col++;
+	unsigned int col = 1;
+	bool done;
+	
+	if (tokens[row][col].front() == '\'') {
+		if(tokens[row][col].back() == '\'') {
+			cout << tokens[row][col].substr(1, tokens[row][col].size()-2) << endl;
+			return row+1;
+		} else {
+			cout << tokens[row][col].substr(1) << ' ';
+			col++;
+			done = false;
+			while(!done) {
+				while (col < tokens[row].size()) {
+					if (tokens[row][col].back() == '\'') {
+						done = true;
+						cout << tokens[row][col].substr(0, tokens[row][col].size()-1);
+						col = tokens[row].size();
+					} else {
+						cout << tokens[row][col] << ' ';
+						col++;
+					}
+				}
+				col = 0;
+				row++;
+				cout << endl;
 			}
-			tokens[row][col].erase(tokens[row][col].size()-1,1);
-			cout << tokens[row][col] << endl;
-		}else if (tokens[row][col].front() == '\"') {
-			tokens[row][col].erase(0,1);
-			while (tokens[row][col].back() != '\"') {
-				cout << tokens[row][col] << ' ';
-				col++;
-			}
-			tokens[row][col].erase(tokens[row][col].size()-1,1);
-			cout << tokens[row][col] << endl;
-		}else {
-			cout << "Is " << tokens[row][col] << " a variable? to be continued..." << endl;
 		}
-		cout << endl;
-	return row;
+	} else if (tokens[row][col].front() == '\"') {
+		if(tokens[row][col].back() == '\"') {
+			cout << tokens[row][col].substr(1, tokens[row][col].size()-1) << endl;
+			return row+1;
+		} else {
+			cout << tokens[row][col].substr(1) << ' ';
+			col++;
+			done = false;
+			while(!done) {
+				while (col < tokens[row].size()) {
+					if (tokens[row][col].back() == '\"') {
+						done = true;
+						cout << tokens[row][col].substr(0, tokens[row][col].size()-1);
+						col = tokens[row].size();
+					} else {
+						cout << tokens[row][col] << ' ';
+						col++;
+					}
+				}
+				col = 0;
+				row++;
+				cout << endl;
+			}
+		}
+	} else {
+		cout << "perhaps a variable, or lack of quotes? Moving on..." << endl;
+		return row+1;
+	}
+	return row-1;
 }
 
 bool isVar(string name) {
