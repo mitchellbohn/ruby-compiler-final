@@ -7,15 +7,14 @@ def fcn
   puts "in the function"
 end
 fcn
+puts gets()
 puts intValue
-fcn
 puts "double quotations"
 strValue = "hello with other lines of info"
 puts strValue
 inputVar = gets()
-puts inputVar
 charValue = 'a'
-puts gets()
-fcn
+gets()
 puts charValue
+puts inputVar
 puts 'dont you, forget about me...'

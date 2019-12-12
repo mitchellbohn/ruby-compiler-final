@@ -42,6 +42,7 @@ vector<vector<string>> tokenizer(vector<string> rubyLines) {
 		tokenized.push_back(tokens);
 	}
 	
+	//prints out tokenized vector
 	/*for (unsigned int i = 0; i < tokenized.size(); i++) {
 		cout << "Row " << i << ": ";
 		for (unsigned int j = 0; j < tokenized[i].size(); j++)
@@ -80,4 +81,22 @@ void traverse(vector<vector<string>> tokens, int start, int end) {
 			}
 		}
 	}
+}
+
+bool isVar(string name, vector<Variable> variables) {
+	for (unsigned int i=0; i<variables.size(); i++) {
+		if (name == variables[i].name) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool isFcn(string name, vector<Function> functions) {
+	for (unsigned int i=0; i<functions.size(); i++) {
+		if (name == functions[i].name) {
+			return true;
+		}
+	}
+	return false;
 }

@@ -88,24 +88,6 @@ vector<Variable> setVariable(vector<string> line, vector<Variable> variables) {
 	return variables;
 }
 
-bool isVar(string name, vector<Variable> variables) {
-	for (unsigned int i=0; i<variables.size(); i++) {
-		if (name == variables[i].name) {
-			return true;
-		}
-	}
-	return false;
-}
-
-bool isFcn(string name, vector<Function> functions) {
-	for (unsigned int i=0; i<functions.size(); i++) {
-		if (name == functions[i].name) {
-			return true;
-		}
-	}
-	return false;
-}
-
 vector<Function> def(vector<vector<string>> tokens, int row, vector<Function> functions) {
 	Function *p = new Function;
 	p->name = tokens[row][1];
