@@ -12,10 +12,10 @@ using namespace std;
  * 1 bool
  * 2 int
  */
-class Value {
+class Variable {
 	public:
 	string name;
-	int valType;
+	int varType;
 	string value;
 };
 
@@ -33,9 +33,15 @@ vector<vector<string>> tokenizer(vector<string> rubyLines);
 
 void traverse(vector<vector<string>> tokens, int start, int end);
 
-int puts(vector<vector<string>> tokens, int row);
+int puts(vector<vector<string>> tokens, int row, vector<Variable> variables);
 
-int def(vector<vector<string>> tokens, int row);
+vector<Function> def(vector<vector<string>> tokens, int row, vector<Function> functions);
+
+vector<Variable> setVariable(vector<string> line, vector<Variable> variables);
+
+bool isVar(string name, vector<Variable> variables);
+
+bool isFcn(string name, vector<Function> functions);
 
 int main(int argc, char *argv[]) {
 	//handling parameters and first possible errors
@@ -106,76 +112,59 @@ vector<vector<string>> tokenizer(vector<string> rubyLines) {
 }
 
 void traverse(vector<vector<string>> tokens, int start, int end) {
-	cout << "traversing..." << endl;
-	vector<Value> values;
-	string currentCase;
+	vector<Variable> variables;
+	vector<Function> functions;
+	cout << "TRAVERSING lines " << start << " to " << end << endl;
 	for(int i = start; i < end; i++) {
 		for (unsigned int j = 0; j < tokens[i].size(); j++) {
+			cout << "row: " << i << " col: " << j << endl;
 			if (j == 0 && tokens[i][j] == "puts") {
-				i = puts(tokens, i);
+				i = puts(tokens, i, variables);
 				j = tokens[i].size()-1;
 			} else if (tokens[i][j] == "def") {
-				i = def(tokens, i);
-			} else if (tokens[i][j] == "puts") {
-			} else if (tokens[i][j] == "puts") {
-			} else {
-				if(tokens[i][j+1] == "=") {
-					cout << "CAUGHT ELSE ROW: " << i << endl;
-					//TODO: regex to determine val type.
-					/*cout << "HERE!" << endl;
-					Value *p = new Value;
-					p->name = tokens[i][j];
-					p->valType = 0;
-					p->value = tokens[i][j+2];
-					values.push_back(*p);
-					cout << "NAME HERE: " << values[0].name << endl;*/
-				}
-			}
-			
-		}
-	}
-	return;
-}
-
-int puts(vector<vector<string>> tokens, int row) {
-	unsigned int col = 1;
-	bool done;
-	
-	if (tokens[row][col].front() == '\'') {
-		if(tokens[row][col].back() == '\'') {
-			cout << tokens[row][col].substr(1, tokens[row][col].size()-2) << endl;
-			return row+1;
-		} else {
-			cout << tokens[row][col].substr(1) << ' ';
-			col++;
-			done = false;
-			while(!done) {
-				while (col < tokens[row].size()) {
-					if (tokens[row][col].back() == '\'') {
-						done = true;
-						cout << tokens[row][col].substr(0, tokens[row][col].size()-1);
-						col = tokens[row].size();
-					} else {
-						cout << tokens[row][col] << ' ';
-						col++;
+				functions = def(tokens, i, functions);
+				i = functions[0].end;
+				j = tokens[i].size()-1;
+				//cout << j << endl;
+			} else if (isFcn(tokens[i][j], functions)) {
+				cout << "we will execute the function..." << endl;
+				for (unsigned int k=0; k<functions.size(); k++) {
+					if (tokens[i][j] == functions[k].name) {
+						traverse(tokens, functions[k].start, functions[k].end-1);
+						cout << "exit Traverse" << endl;
 					}
 				}
-				col = 0;
-				row++;
-				cout << endl;
+			}else if(!isVar(tokens[i][j], variables) && tokens[i][1] == "=") {
+				//cout << tokens[i][j] << endl;
+					variables = setVariable(tokens[i], variables);
+				j = tokens[i].size()-1;
 			}
+				/*cout << "failed var" << endl;
+				if (isFcn(tokens[i][j], functions)) {
+					cout << "we will execute the function..." << endl;
+				}*/
+				//cout << "end of else" << endl;
 		}
-	} else if (tokens[row][col].front() == '\"') {
-		if(tokens[row][col].back() == '\"') {
-			cout << tokens[row][col].substr(1, tokens[row][col].size()-1) << endl;
-			return row+1;
+	}
+}
+
+int puts(vector<vector<string>> tokens, int row, vector<Variable> variables) {
+	unsigned int col = 1;
+	bool done;
+	bool dblQuotes = false;
+	if (tokens[row][col].front() == '\"')
+		dblQuotes = true;
+	if (tokens[row][col].front() == '\'' || tokens[row][col].front() == '\"') {
+		if((tokens[row][col].back() == '\'' && !dblQuotes) || (tokens[row][col].back() == '\"' && dblQuotes)) {
+			cout << tokens[row][col].substr(1, tokens[row][col].size()-2) << endl;
+			return row;
 		} else {
 			cout << tokens[row][col].substr(1) << ' ';
 			col++;
 			done = false;
 			while(!done) {
 				while (col < tokens[row].size()) {
-					if (tokens[row][col].back() == '\"') {
+					if ((tokens[row][col].back() == '\'' && !dblQuotes) || (tokens[row][col].back() == '\"' && dblQuotes)) {
 						done = true;
 						cout << tokens[row][col].substr(0, tokens[row][col].size()-1);
 						col = tokens[row].size();
@@ -190,23 +179,75 @@ int puts(vector<vector<string>> tokens, int row) {
 			}
 		}
 	} else {
-		cout << "perhaps a variable, or lack of quotes? Moving on..." << endl;
-		return row+1;
+		unsigned int i = 0;
+		while (i < variables.size()) {
+			if(variables[i].name == tokens[row][1]) {
+				cout << variables[i].value << endl;
+				i = variables.size();
+			} else {
+				i++;
+			}
+		}
+		return row;
 	}
 	return row-1;
 }
 
-bool isVar(string name) {
-	return true;
+vector<Variable> setVariable(vector<string> line, vector<Variable> variables) {
+	//try adding gets()!
+	Variable *p = new Variable;
+	p->name = line[0];
+	bool dblQuote = false;
+	if (line[2].front() == '\"') {
+		dblQuote = true;
+	}
+	for(unsigned int i=2; i<line.size(); i++) {
+		if ((line[i].front() == '\'' && !dblQuote) || (line[i].front() == '\"' && dblQuote)) {
+			if ((line[i].back() == '\'' && !dblQuote) || (line[i].back() == '\"' && dblQuote)) {
+				p->value.append(line[i].substr(1, line[i].size()-2));
+			} else {
+				p->value.append(line[i].substr(1));
+				p->value.append(" ");
+			}
+		} else if ((line[i].back() == '\'' && !dblQuote) || (line[i].back() == '\"' && dblQuote)) {
+			p->value.append(line[i].substr(0, line[i].size()-1));
+		} else {
+			p->value.append(line[i]);
+			p->value.append(" ");
+		}
+		
+	}
+	p->varType = 0; //TODO: get varType
+	variables.push_back(*p);
+	return variables;
 }
 
-int def(vector<vector<string>> tokens, int row) {
+bool isVar(string name, vector<Variable> variables) {
+	for (unsigned int i=0; i<variables.size(); i++) {
+		if (name == variables[i].name) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool isFcn(string name, vector<Function> functions) {
+	for (unsigned int i=0; i<functions.size(); i++) {
+		if (name == functions[i].name) {
+			return true;
+		}
+	}
+	return false;
+}
+
+vector<Function> def(vector<vector<string>> tokens, int row, vector<Function> functions) {
 	Function *p = new Function;
 	p->name = tokens[row][1];
+	p->start = row+1;
 	while(tokens[row][0] != "end") {
 		row++;
 	}
 	p->end = row;
-	cout << "name: " << p->name << endl;
-	return row;
+	functions.push_back(*p);
+	return functions;
 }
