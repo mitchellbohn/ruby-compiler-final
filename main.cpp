@@ -4,28 +4,9 @@
 #include <vector>
 #include <sstream>
 #include <iterator>
-#include <regex>
+#include "header.h"
 
 using namespace std;
-
-/* 0 string
- * 1 bool
- * 2 int
- */
-class Variable {
-	public:
-	string name;
-	int varType;
-	string value;
-};
-
-class Function {
-	public:
-	string name;
-	int start;
-	int end;
-	
-};
 
 vector<string> scanner(string rubyFile);
 
@@ -57,7 +38,7 @@ int main(int argc, char *argv[]) {
 		else {
 			vector<string> rubyLines = scanner(parameter);
 			vector<vector<string>> tokens = tokenizer(rubyLines);
-			traverse(tokens, 0, tokens.size()-1);
+			traverse(tokens, 0, tokens.size());
 		}
 	}
 	return 0;
@@ -69,11 +50,8 @@ vector<string> scanner(string rubyFile) {
 	infile.open(rubyFile);
 	if(!infile.is_open())
 		cout << "error opening file \"" << rubyFile << "\", please check parameters..." << endl;
-	else
-		cout << "[1] File \"" << rubyFile << "\" is open..." << endl;
-	
+		
 	//adds lines to Lines vector
-	cout << "[2] Scanning..." << endl;
 	int i = 0;
     vector<string> rubyLines;
     string currentLine;
@@ -114,10 +92,8 @@ vector<vector<string>> tokenizer(vector<string> rubyLines) {
 void traverse(vector<vector<string>> tokens, int start, int end) {
 	vector<Variable> variables;
 	vector<Function> functions;
-	cout << "TRAVERSING lines " << start << " to " << end << endl;
 	for(int i = start; i < end; i++) {
 		for (unsigned int j = 0; j < tokens[i].size(); j++) {
-			cout << "row: " << i << " col: " << j << endl;
 			if (j == 0 && tokens[i][j] == "puts") {
 				i = puts(tokens, i, variables);
 				j = tokens[i].size()-1;
@@ -125,25 +101,19 @@ void traverse(vector<vector<string>> tokens, int start, int end) {
 				functions = def(tokens, i, functions);
 				i = functions[0].end;
 				j = tokens[i].size()-1;
-				//cout << j << endl;
 			} else if (isFcn(tokens[i][j], functions)) {
-				cout << "we will execute the function..." << endl;
 				for (unsigned int k=0; k<functions.size(); k++) {
 					if (tokens[i][j] == functions[k].name) {
 						traverse(tokens, functions[k].start, functions[k].end-1);
-						cout << "exit Traverse" << endl;
+						k = functions.size();
 					}
 				}
 			}else if(!isVar(tokens[i][j], variables) && tokens[i][1] == "=") {
-				//cout << tokens[i][j] << endl;
 					variables = setVariable(tokens[i], variables);
 				j = tokens[i].size()-1;
+			}else{
+				cout << "else" << endl;
 			}
-				/*cout << "failed var" << endl;
-				if (isFcn(tokens[i][j], functions)) {
-					cout << "we will execute the function..." << endl;
-				}*/
-				//cout << "end of else" << endl;
 		}
 	}
 }
