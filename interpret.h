@@ -60,7 +60,7 @@ void traverse(vector<vector<string>> tokens, int start, int end) {
 				i = puts(tokens, i, variables);
 				j = tokens[i].size()-1;
 			} else if (tokens[i][j] == "gets()") {
-				//callgets();
+				callgets();
 			} else if (tokens[i][j] == "def") {
 				functions = def(tokens, i, functions);
 				i = functions[0].end;

@@ -4,8 +4,13 @@ int puts(vector<vector<string>> tokens, int row, vector<Variable> variables) {
 	unsigned int col = 1;
 	bool done;
 	bool dblQuotes = false;
-	if (tokens[row][col].front() == '\"')
+	if (tokens[row][col] == "gets()") {
+		cout << callgets() << endl;
+		row++;
+		return row;
+	}else if (tokens[row][col].front() == '\"') {
 		dblQuotes = true;
+	}
 	if (tokens[row][col].front() == '\'' || tokens[row][col].front() == '\"') {
 		if((tokens[row][col].back() == '\'' && !dblQuotes) || (tokens[row][col].back() == '\"' && dblQuotes)) {
 			cout << tokens[row][col].substr(1, tokens[row][col].size()-2) << endl;
